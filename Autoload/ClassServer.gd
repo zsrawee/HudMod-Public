@@ -29,7 +29,7 @@ const CLASSNAME_BUILTIN_REVERSE_MAP: Dictionary[StringName, Variant.Type] = {
 	&"Vector3": TYPE_VECTOR3,
 	&"Color": TYPE_COLOR,
 	&"Array": TYPE_ARRAY,
-	&"Object": TYPE_OBJECT
+	&"Object": TYPE_OBJECT,
 }
 const CLASSNAME_USABLE_RES: StringName = &"UsableRes"
 const CLASSNAME_COMPONENT_RES: StringName = &"ComponentRes"
@@ -58,7 +58,7 @@ var comps_sections_infos: Dictionary[StringName, CompsSectionInfo] = {
 	TYPE_VECTOR3: BaseClassInfo.new(preload("uid://hyfoqvtp8u4t"), "", IS.create_vec3_edit),
 	TYPE_COLOR: BaseClassInfo.new(preload("uid://b2nqjyp4cghvq"), "", IS.create_color_edit),
 	TYPE_ARRAY: BaseClassInfo.new(preload("uid://dnimcsg6d8dfy"), "", IS.create_list_edit),
-	TYPE_OBJECT: ObjectClassInfo.new()
+	TYPE_OBJECT: ObjectClassInfo.new(),
 }
 var object_classes: Dictionary[StringName, Dictionary] # All Object base
 var usable_res_classes: Dictionary[StringName, Dictionary] # All UsableRes base
@@ -92,8 +92,13 @@ func _build_classes() -> void:
 			inheritance_classnames.append(basescript.get_global_name())
 			basescript = basescript.get_base_script()
 		
+		var icon_val: Variant
+		if FileAccess.file_exists(class_builtin_info.icon):
+			icon_val = load(class_builtin_info.icon)
+		else:
+			icon_val = null
 		var class_custom_info: Dictionary[StringName, Variant] = {
-			&"icon": load(class_builtin_info.icon) if FileAccess.file_exists(class_builtin_info.icon) else null,
+			&"icon": icon_val,
 			&"script": script,
 			&"inh": inheritance_classnames
 		}
@@ -226,4 +231,3 @@ class ObjectClassInfo extends BaseClassInfo:
 	
 	static func get_default_icon() -> Texture2D: return default_icon
 	static func set_default_icon(new_val: Texture2D) -> void: default_icon = new_val
-

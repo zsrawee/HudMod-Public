@@ -1109,6 +1109,3 @@ func _on_window_focus_entered() -> void:
 
 func _on_window_files_dropped(files_pathes: Array[String]) -> void:
 	pass
-
-
-

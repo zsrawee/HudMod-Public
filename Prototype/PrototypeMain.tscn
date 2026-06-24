@@ -23,6 +23,7 @@
 [ext_resource type="Texture2D" uid="uid://y14al8cbxy4t" path="res://Asset/Icons/visible.png" id="32_t8vbk"]
 [ext_resource type="Script" uid="uid://uupil02s5ia4" path="res://Editor/ColorCorrection/ColorScopeEditor.gd" id="37_t8vbk"]
 [ext_resource type="Script" uid="uid://dqqk0jf0ddsai" path="res://Editor/TimeLine/TimeLine2.gd" id="38_bn3x6"]
+[ext_resource type="Script" path="res://Editor/AI/AIChat.gd" id="99_aichat"]
 
 [sub_resource type="GDScript" id="GDScript_sruw6"]
 script/source = "extends HBoxContainer
@@ -39,6 +40,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_30lmd")
 editors = {
+&"ai_chat": NodePath("EditorsFolder/AIChat"),
 &"color_correction": NodePath("EditorsFolder/ColorCorrectionEditor"),
 &"color_scope": NodePath("EditorsFolder/ColorScopeEditor"),
 &"media_explorer": NodePath("EditorsFolder/MediaExplorer"),
@@ -249,6 +251,18 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("22_kg1lx")
 metadata/_custom_type_script = "uid://jyhrc5jyau06"
+
+[node name="AIChat" type="Control" parent="EditorsFolder" unique_id=123456789]
+custom_minimum_size = Vector2(400, 400)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("99_aichat")
 
 [node name="GlobalControl" type="Control" parent="." unique_id=957362020]
 layout_mode = 1

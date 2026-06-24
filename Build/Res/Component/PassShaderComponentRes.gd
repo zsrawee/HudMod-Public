@@ -14,7 +14,8 @@ static func _shader() -> Shader:
 	return null
 
 func set_shader_prop(prop_key: StringName, prop_val: Variant) -> void:
-	curr_shader_mat.set_shader_parameter(prop_key, prop_val)
+	if curr_shader_mat:
+		curr_shader_mat.set_shader_parameter(prop_key, prop_val)
 
 func create_pass_shader_material() -> ShaderMaterial:
 	var shader_mat:= ShaderMaterial.new()

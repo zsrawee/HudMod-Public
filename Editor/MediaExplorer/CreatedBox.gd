@@ -434,4 +434,3 @@ class FolderCard extends CreatedCard:
 		match id:
 			0: delete()
 			1: popup_move_to_window()
-

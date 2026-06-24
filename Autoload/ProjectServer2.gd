@@ -154,6 +154,12 @@ func open_project(_project_path: String) -> bool:
 	opened_clip_res_path.clear()
 	
 	project_res = _project_res
+	project_res.load_comments_json(project_path)
+	
+	if not project_res.comment_added.is_connected(_on_comment_changed):
+		project_res.comment_added.connect(_on_comment_changed)
+		project_res.comment_removed.connect(_on_comment_changed)
+		project_res.comment_moved.connect(_on_comment_moved)
 	
 	saved_version = undo_redo.get_version()
 	
@@ -201,6 +207,8 @@ func save() -> void:
 	ResourceSaver.save(import_file_system, project_paths.import_sys)
 	ResourceSaver.save(preset_file_system, project_paths.preset_sys)
 	ResourceSaver.save(project_res, project_paths.project_res)
+	project_res.save_comments_json(project_path)
+	project_res.export_project_json(project_path)
 	
 	GlobalServer.save_global()
 	MediaServer.save_not_saved_yet()
@@ -278,6 +286,14 @@ func try_exit_clip_res(times: int = 1) -> void:
 
 func emit_opened_clip_res_changed(old_one: MediaClipRes, new_one: MediaClipRes) -> void:
 	opened_clip_res_changed.emit(old_one, new_one)
+
+func _on_comment_changed(frame: int, comment: CommentRes) -> void:
+	project_res.save_comments_json(project_path)
+	project_res.export_project_json(project_path)
+
+func _on_comment_moved(from_frame: int, to_frame: int, comment: CommentRes) -> void:
+	project_res.save_comments_json(project_path)
+	project_res.export_project_json(project_path)
 
 
 

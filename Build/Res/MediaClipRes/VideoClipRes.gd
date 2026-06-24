@@ -83,6 +83,15 @@ func init_node(root_layer_idx: int, layer_idx: int, layer_res: LayerRes, frame: 
 
 func enter(node: Node) -> void:
 	super(node)
+	if not video_ctx and video and MediaCache.video_contexts_has(video):
+		video_ctx = MediaCache.get_video_context(video)
+		audio_data_res = MediaCache.get_audio_data(video)
+		if video_ctx: fps = video_ctx.fps
+		is_opening = true
+	if not video_ctx:
+		node.texture = get_self_texture()
+		Scene2.add_video_player(self)
+		return
 	video_decoder = video_ctx.request_video_decoder()
 	_init_video_shader_params()
 	seek_frame_smart(0)
@@ -91,7 +100,7 @@ func enter(node: Node) -> void:
 
 func _process_comps(frame: int) -> void:
 	
-	if is_opening:
+	if is_opening and video_decoder:
 		var new_video_frame: int = (frame + from) / float(ProjectServer2.fps) * fps
 		
 		if new_video_frame != video_decoder.get_curr_frame():
@@ -104,20 +113,25 @@ func _process_comps(frame: int) -> void:
 func exit(node: Node) -> void:
 	super(node)
 	
-	video_decoder.set_channel_y([])
-	video_decoder.set_channel_u([])
-	video_decoder.set_channel_v([])
+	if video_decoder:
+		video_decoder.set_channel_y([])
+		video_decoder.set_channel_u([])
+		video_decoder.set_channel_v([])
 	texture_y = null
 	texture_u = null
 	texture_v = null
 	
-	video_ctx.push_video_decoder_front(video_decoder)
+	if video_ctx and video_decoder:
+		video_ctx.push_video_decoder_front(video_decoder)
 	video_decoder = null
 	
 	_update_video_shader_params()
 	Scene2.remove_video_player(self)
 
 func seek_frame_smart(at: int) -> void:
+	
+	if not video_ctx or not video_decoder:
+		return
 	
 	if video_ctx.has_frame(at):
 		var yuv: Array[Texture2D] = video_ctx.get_frame(at)
@@ -158,6 +172,7 @@ func _update_video_shader_params() -> void:
 	pre_shader_material.set_shader_parameter(&"tex_v", texture_v)
 
 func _init_video_shader_params() -> void:
+	if not pre_shader_material: return
 	var bit_depth: int = video_decoder.get_bit_depth()
 	pre_shader_material.set_shader_parameter(&"color_matrix", video_decoder.get_color_matrix_idx())
 	pre_shader_material.set_shader_parameter(&"is_full_range", false)
@@ -246,6 +261,3 @@ func erase_paths(paths_for_erase: PackedStringArray) -> void:
 
 func update_paths() -> void:
 	video = video
-
-
-

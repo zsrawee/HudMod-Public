@@ -356,5 +356,3 @@ class AudioF32Data extends Resource:
 
 func _on_editor_settings_settings_updated() -> void:
 	video_contexts_update_max_cache_size()
-
-

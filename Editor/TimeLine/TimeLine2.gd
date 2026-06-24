@@ -47,6 +47,8 @@ const SMALL_STEP_BY_FPS: Dictionary[int, int] = {
 @onready var split_btn: TextureButton = IS.create_texture_button(preload("res://Asset/Icons/split-clip.png"), null, null, "Split")
 @onready var split_right_btn: TextureButton = IS.create_texture_button(preload("res://Asset/Icons/right-split-clip.png"), null, null, "Split right")
 @onready var marker_btn: TextureButton = IS.create_texture_button(preload("res://Asset/Icons/location-marker.png"), null, null, "New marker")
+@onready var comment_btn: TextureButton = IS.create_texture_button(preload("res://Asset/Icons/document.png"), null, null, "New comment")
+
 @onready var clip_path_ctrlr: PathController = PathController.new()
 @onready var overlay_menu: Menu = IS.create_menu([
 	MenuOption.new("", preload("res://Asset/Icons/AddClipMethods/place_on_top.png")),
@@ -145,6 +147,7 @@ func _ready_editor() -> void:
 		add_layer_btn,
 		split_panelcont,
 		marker_btn,
+		comment_btn,
 		path_scroll_cont,
 		overlay_menu,
 		snap_panelcont,
@@ -177,6 +180,8 @@ func _ready_editor() -> void:
 	split_right_btn.pressed.connect(_on_split_right_button_pressed)
 	add_layer_btn.pressed.connect(_on_add_layer_btn_pressed)
 	marker_btn.pressed.connect(_on_marker_btn_pressed)
+	comment_btn.pressed.connect(_on_comment_btn_pressed)
+
 	clip_path_ctrlr.undo_requested.connect(_on_clip_path_ctrlr_undo_requested)
 	center_btn.pressed.connect(_on_center_btn_pressed)
 	
@@ -427,8 +432,10 @@ class TimeMarkPanelContainer extends PanelContainer:
 	var timeline: TimeLine2
 	
 	@onready var timemarkers_control: Control = IS.create_empty_control()
+	@onready var comments_control: Control = IS.create_empty_control()
 	
 	var timemarkers: Dictionary[TimeMarkerRes, TimeMarker2]
+	var comments: Dictionary[CommentRes, Comment2]
 	
 	var displayed_frames: Dictionary[int, float] # {frame: display_pos}
 	
@@ -444,6 +451,7 @@ class TimeMarkPanelContainer extends PanelContainer:
 	
 	func _ready() -> void:
 		add_child(timemarkers_control)
+		add_child(comments_control)
 		open_project_res(ProjectServer2.project_res)
 		ProjectServer2.project_opened.connect(_on_project_server_project_opened)
 	
@@ -460,6 +468,7 @@ class TimeMarkPanelContainer extends PanelContainer:
 	
 	func update_timemarkpanel_view() -> void:
 		transform_timemarkers()
+		transform_comments()
 		queue_redraw()
 	
 	func _draw() -> void:
@@ -523,13 +532,25 @@ class TimeMarkPanelContainer extends PanelContainer:
 			timemarkers[tmr].queue_free()
 		timemarkers.clear()
 		
+		for cmt: CommentRes in comments:
+			comments[cmt].queue_free()
+		comments.clear()
+		
 		var tmrs: Dictionary[int, TimeMarkerRes] = project_res.timemarkers
 		for frame: int in tmrs:
 			spawn_timemarker(frame, tmrs[frame])
 		
+		var cmts: Dictionary[int, CommentRes] = project_res.comments
+		for frame: int in cmts:
+			spawn_comment(frame, cmts[frame])
+		
 		project_res.timemarker_added.connect(_on_projectres_timemarker_added)
 		project_res.timemarker_removed.connect(_on_projectres_timemarker_removed)
 		project_res.timemarker_moved.connect(_on_projectres_timemarker_moved)
+		
+		project_res.comment_added.connect(_on_projectres_comment_added)
+		project_res.comment_removed.connect(_on_projectres_comment_removed)
+		project_res.comment_moved.connect(_on_projectres_comment_moved)
 	
 	func spawn_timemarker(frame: int, timemarker_res: TimeMarkerRes) -> void:
 		var timemarker:= TimeMarker2.new()
@@ -574,6 +595,43 @@ class TimeMarkPanelContainer extends PanelContainer:
 	func update_timemarkers_spacial_frames() -> void:
 		timeline.update_timemarkers_spacial_frames()
 		timeline.update_spacial_frames()
+	
+	func spawn_comment(frame: int, comment_res: CommentRes) -> void:
+		var comment:= Comment2.new()
+		comment.frame = frame
+		comment.comment_res = comment_res
+		comment.custom_minimum_size = Vector2(10., 10.)
+		comments_control.add_child(comment)
+		comments[comment_res] = comment
+		transform_comment(frame, comment_res)
+	
+	func free_comment(frame: int, comment_res: CommentRes) -> void:
+		comments[comment_res].queue_free()
+		comments.erase(comment_res)
+	
+	func move_comment(comment_res: CommentRes, to_frame: int) -> void:
+		comments[comment_res].frame = to_frame
+		transform_comment(to_frame, comment_res)
+	
+	func transform_comments() -> void:
+		var cmts: Dictionary[int, CommentRes] = ProjectServer2.project_res.comments
+		for frame: int in cmts:
+			transform_comment(frame, cmts[frame])
+	
+	func transform_comment(frame: int, comment_res: CommentRes) -> void:
+		comments[comment_res].position.x = timeline.get_display_pos_from_frame(frame) - 8.
+	
+	func _on_projectres_comment_added(frame: int, comment: CommentRes) -> void:
+		spawn_comment(frame, comment)
+		update_timemarkers_spacial_frames()
+	
+	func _on_projectres_comment_removed(frame: int, comment: CommentRes) -> void:
+		free_comment(frame, comment)
+		update_timemarkers_spacial_frames()
+	
+	func _on_projectres_comment_moved(from_frame: int, to_frame: int, comment: CommentRes) -> void:
+		move_comment(comment, to_frame)
+		update_timemarkers_spacial_frames()
 
 
 class LayersSelectContainer extends SelectContainer:
@@ -1073,7 +1131,10 @@ func update_clips_spacial_frames(ignored_clips: Array = []) -> void:
 		for frame: int in port:
 			if ignored_clips.has(port[frame]):
 				continue
-			var clip_spacial_frames: PackedInt32Array = layer.get_clip(frame).select_panel.get_spacial_frames()
+			var clip_panel = layer.get_clip(frame)
+			if clip_panel == null or clip_panel.select_panel == null:
+				continue
+			var clip_spacial_frames: PackedInt32Array = clip_panel.select_panel.get_spacial_frames()
 			for spacial_frame: int in clip_spacial_frames:
 				clips_spacial_frames.append(frame + spacial_frame)
 	
@@ -1085,6 +1146,8 @@ func update_clips_spacial_frames(ignored_clips: Array = []) -> void:
 func update_timemarkers_spacial_frames() -> void:
 	timemarkers_spacial_frames.clear()
 	for frame: int in ProjectServer2.project_res.timemarkers:
+		timemarkers_spacial_frames.append(frame)
+	for frame: int in ProjectServer2.project_res.comments:
 		timemarkers_spacial_frames.append(frame)
 	timemarkers_spacial_frames.sort()
 
@@ -1138,7 +1201,7 @@ func snap_with_cursor_and_timemarkers(frame: int, ignore_cursor: bool, ignore_ti
 	var target_dist: float = INF
 	
 	if not ignore_timemarkers:
-		if timemarkers_spacial_frames:
+		if not timemarkers_spacial_frames.is_empty():
 			var timemarker_target_idx: int = ArrHelper.int32_array_find_closest(frame, timemarkers_spacial_frames)
 			target_frame = timemarkers_spacial_frames[timemarker_target_idx]
 			target_dist = absi(target_frame - frame)
@@ -1154,17 +1217,28 @@ func get_next_spacial_frame(frame: int, step: int) -> int:
 	if spacial_frames.is_empty():
 		return frame
 	
+	var size: int = spacial_frames.size()
 	var curr_idx: int = ArrHelper.int32_array_find_leftright(frame, spacial_frames).y
-	var target_idx: int = curr_idx
-	var target_frame: int = frame
 	
-	while target_frame == frame:
-		target_idx += step
-		if target_idx > spacial_frames.size() - 1 and step > 0:
-			return spacial_frames[step - 1]
-		target_frame = spacial_frames[target_idx]
+	if curr_idx < 0:
+		curr_idx = 0
+	elif curr_idx >= size:
+		curr_idx = size - 1
 	
-	return target_frame
+	if spacial_frames[curr_idx] == frame:
+		var target_idx: int = curr_idx + step
+		if target_idx >= size:
+			return spacial_frames[0]
+		elif target_idx < 0:
+			return spacial_frames[size - 1]
+		return spacial_frames[target_idx]
+	
+	var target_idx: int = curr_idx + step
+	if target_idx >= size:
+		return spacial_frames[0]
+	elif target_idx < 0:
+		return spacial_frames[size - 1]
+	return spacial_frames[target_idx]
 
 func open_project_res(project_res: ProjectRes) -> void:
 	
@@ -1399,6 +1473,14 @@ func _on_marker_btn_pressed() -> void:
 		ProjectServer2.project_res.remove_timemarker.bind(PlaybackServer.position)
 	)
 
+func _on_comment_btn_pressed() -> void:
+	ProjectServer2.commit_action(
+		"add_comment",
+		ProjectServer2.project_res.add_comment.bind(PlaybackServer.position),
+		ProjectServer2.project_res.remove_comment.bind(PlaybackServer.position)
+	)
+
+
 func _on_clip_path_ctrlr_undo_requested(undo_times: int) -> void:
 	ProjectServer2.try_exit_clip_res(undo_times)
 
@@ -1462,6 +1544,3 @@ func _on_clip_res_clips_splited(coords: Array[Vector2i], deleted_coords: Array[V
 
 func _on_clip_res_clips_updated(coords: Array[Vector2i]) -> void:
 	update_clips(coords)
-
-
-

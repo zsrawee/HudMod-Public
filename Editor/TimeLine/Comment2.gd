@@ -1,0 +1,109 @@
+#############################################################################
+##  This file is part of: HudMod Video Editor                              ##
+##  https://omar-top.itch.io/hudmod-video-editor                           ##
+## ----------------------------------------------------------------------- ##
+##  Copyright © 2026 Omar Mohammed Balita.                                 ##
+## ----------------------------------------------------------------------- ##
+##  This program is free software: you can redistribute it and/or modify   ##
+##  it under the terms of the GNU General Public License as published by   ##
+##  the Free Software Foundation, either version 3 of the License, or      ##
+##  (at your option) any later version.                                    ##
+##                                                                         ##
+##  This program is distributed in the hope that it will be useful,        ##
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of         ##
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the           ##
+##  GNU General Public License for more details.                           ##
+##                                                                         ##
+##  You should have received a copy of the GNU General Public License      ##
+##  along with this program. If not, see <https://www.gnu.org/licenses/>.  ##
+#############################################################################
+class_name Comment2 extends Button
+
+static var rainbow_styles: Array[StyleBoxFlat] = get_rainbow_styles()
+
+@export var frame: int
+@export var comment_res: CommentRes:
+	set(val):
+		if comment_res == val:
+			return
+		comment_res = val
+		update()
+
+static func get_rainbow_styles() -> Array[StyleBoxFlat]:
+	var result: Array[StyleBoxFlat]
+	for color: Color in IS.RAINBOW_COLORS:
+		var style:= StyleBoxFlat.new()
+		style.bg_color = color
+		style.corner_radius_top_left = 4
+		style.corner_radius_top_right = 4
+		style.corner_radius_bottom_left = 4
+		style.corner_radius_bottom_right = 4
+		style.content_margin_left = 4
+		style.content_margin_right = 4
+		style.content_margin_top = 2
+		style.content_margin_bottom = 2
+		result.append(style)
+	return result
+
+func _init() -> void:
+	pressed.connect(_on_pressed)
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_RIGHT:
+			if event.is_released():
+				ProjectServer2.commit_action(
+					"remove_comment",
+					ProjectServer2.project_res.remove_comment.bind(frame),
+					ProjectServer2.project_res.add_comment.bind(frame)
+				)
+
+func update() -> void:
+	tooltip_text = comment_res.custom_name + "\n" + comment_res.custom_text
+	var style_idx: int = rainbow_styles.find_custom(func(element: StyleBoxFlat) -> bool: return element.bg_color == comment_res.custom_color)
+	if style_idx < 0: style_idx = 0
+	var style: StyleBoxFlat = rainbow_styles[style_idx]
+	IS.set_button_style(self, style)
+
+func _on_pressed() -> void:
+	if not comment_res:
+		return
+	
+	var color_options: Array[MenuOption]
+	
+	var colors: Array[Color] = IS.RAINBOW_COLORS
+	for color: Color in colors:
+		var option: MenuOption = MenuOption.new("", IS.TEXTURE_MARKER)
+		option.set_meta("modulate", color)
+		option.set_meta("icon_alignment", 1)
+		color_options.append(option)
+	
+	var custom_color_index: int = colors.find(comment_res.custom_color)
+	
+	var name_line: LineEdit = IS.create_line_edit("Comment Name", comment_res.custom_name, null, {max_length = 24})
+	var color_menu: Menu = IS.create_menu(color_options, false, true, {custom_minimum_size = Vector2(0, 40)})
+	var text_edit: EditContainer = IS.create_string_edit("Comment Text", "", "", IS.StringControllerType.TYPE_MULTILINE)
+	var text_controller: TextEdit = text_edit.controller
+	
+	color_menu.focus_index = custom_color_index
+	text_edit.keyframable = false
+	
+	var comment_window: BoxContainer = WindowManager.popup_accept_window(
+		get_tree().get_current_scene(),
+		Vector2i(550, 500),
+		"Edit Comment",
+		func() -> void:
+			comment_res.custom_name = name_line.get_text()
+			comment_res.custom_color = colors[color_menu.get_focus_index()]
+			comment_res.custom_text = text_controller.get_text()
+			update()
+	)
+	
+	IS.add_children(comment_window, [
+		name_line, color_menu, text_edit
+	])
+	
+	IS.expand(text_edit, true, true)
+	
+	name_line.select()
+	name_line.grab_focus()

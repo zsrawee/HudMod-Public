@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cqoih01wcjjxs"
+path="res://.godot/imported/audio_extracted.wav-7672a0209c4e913ab477b80972ac61f9.sample"
+
+[deps]
+
+source_file="res://HudMod Video/audio_extracted.wav"
+dest_files=["res://.godot/imported/audio_extracted.wav-7672a0209c4e913ab477b80972ac61f9.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

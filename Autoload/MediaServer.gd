@@ -231,8 +231,17 @@ func load_waveform(media_path: String, thumbnail_path: String, id: String) -> vo
 	)
 	
 	for file_name: String in imgs_files:
-		var waveform_image: Image = Image.load_from_file(waveform_port_path.path_join(file_name))
-		if waveform_image == null: continue
+		var img_path: String = waveform_port_path.path_join(file_name)
+		var ext: String = file_name.get_extension().to_lower()
+		if ext not in ["png", "jpg", "jpeg", "webp", "bmp", "tga", "tif", "tiff"]: continue
+		var waveform_image: Image = Image.new()
+		var f: FileAccess = FileAccess.open(img_path, FileAccess.READ)
+		if not f: continue
+		var buf: PackedByteArray = f.get_buffer(f.get_length())
+		f.close()
+		if buf.is_empty(): continue
+		if waveform_image.load_png_from_buffer(buf) != OK and waveform_image.load_jpg_from_buffer(buf) != OK and waveform_image.load_bmp_from_buffer(buf) != OK and waveform_image.load_tga_from_buffer(buf) != OK and waveform_image.load_webp_from_buffer(buf) != OK:
+			continue
 		waveform_image.generate_mipmaps()
 		waveform_images.append(waveform_image)
 		waveform_textures.append(ImageTexture.create_from_image(waveform_image))
@@ -315,7 +324,12 @@ func create_thumbnail_from_video(key_as_path: StringName, video_decoder: VideoDe
 	if not video_decoder.seek_frame(video_decoder.get_total_frames_by_dur() / 2):
 		return {}
 	video_decoder.update_video_data(1.)
-	var image: Image = Image.create_from_data(video_decoder.get_width(), video_decoder.get_height(), false, Image.FORMAT_RGB8, video_decoder.get_video_data())
+	var video_data: PackedByteArray = video_decoder.get_video_data()
+	var w: int = video_decoder.get_width()
+	var h: int = video_decoder.get_height()
+	if video_data.is_empty() or video_data.size() < w * h * 3:
+		return {}
+	var image: Image = Image.create_from_data(w, h, false, Image.FORMAT_RGB8, video_data)
 	return create_thumbnail_from_image(key_as_path, image, thumbnail_path, id)
 
 func create_thumbnail_from_audio(key_as_path: StringName, audio_data_res: MediaCache.AudioF32Data, thumbnail_path: String, id: String) -> Dictionary:
@@ -1146,7 +1160,8 @@ class VideoClipPanel extends ClipPanel:
 			update_method = __update_ui
 			update_transform_method = __update_ui_transform
 		super()
-		thumbnail_rect.modulate.a = .8
+		if thumbnail_rect:
+			thumbnail_rect.modulate.a = .8
 	
 	func _update_ui() -> void:
 		update_method.call()
@@ -1446,6 +1461,3 @@ func get_media_classname_from_type(type: MediaType) -> StringName:
 
 func is_media_type_preset(path: String) -> bool:
 	return path.get_extension() in ["res", "tres"]
-
-
-

@@ -11,7 +11,9 @@
 var shader_params_names_list: Dictionary[String, String]
 
 func set_shader_prop(prop_key: StringName, prop_val: Variant) -> void:
-	owner.get_post_shader_material().set_shader_parameter(get_shader_param_code_name(prop_key), prop_val)
+	var mat = owner.get_post_shader_material()
+	if mat:
+		mat.set_shader_parameter(get_shader_param_code_name(prop_key), prop_val)
 
 func get_shader_params_names_list() -> Dictionary[String, String]:
 	return shader_params_names_list

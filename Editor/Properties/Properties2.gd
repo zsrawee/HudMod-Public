@@ -558,7 +558,7 @@ func _spawn_component_controller(section_key: StringName, comp_info: ComponentIn
 	
 	var update_usable_ress_func: Callable = func(new_frame: int) -> void:
 		var media_res: MediaClipRes = comp_res_owner.get_owner()
-		
+		if not media_res: return
 		var new_local_frame: int = clamp(new_frame - media_res.clip_pos, 0, media_res.length)
 		comp_res_owner.update_controllers(new_local_frame)
 	
@@ -627,5 +627,3 @@ class ComponentInfo extends Resource:
 	
 	func append_component_res(value: UsableRes) -> void:
 		components_ress.append(value)
-
-

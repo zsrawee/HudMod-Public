@@ -75,7 +75,7 @@ func update_render_profile_edit() -> void:
 func _on_video_render_btn_pressed() -> void:
 	video_render_profile.create_renderer_from_profile()
 
-func _on_video_render_profile_renderer_created_successfully(output_path: String, video_renderer: VideoRenderer, audio_renderer: Resource) -> void:
+func _on_video_render_profile_renderer_created_successfully(output_path: String, video_renderer: VideoRenderer, audio_renderer: AudioRenderer) -> void:
 	Renderer.start(output_path, video_renderer, audio_renderer)
 
 func _on_video_render_profile_renderer_creation_failed(error: String) -> void:

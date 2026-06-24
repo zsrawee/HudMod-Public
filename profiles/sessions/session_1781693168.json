@@ -1,0 +1,46 @@
+{
+	"decisions": [
+		{
+			"action": "cut",
+			"details": {
+				"frame": 150.0,
+				"reason": "scene_change"
+			},
+			"reason": "user_instruction",
+			"step": 1,
+			"timestamp": "2026-06-17 17:46:26"
+		}
+	],
+	"ended_at": "2026-06-17 17:46:46",
+	"evaluation": {
+
+	},
+	"questions": [],
+	"session_id": "session_1781693168",
+	"started_at": "2026-06-17 17:46:08",
+	"status": "completed",
+	"style_extracted": {
+		"color_preferences": {
+
+		},
+		"cut_patterns": {
+			"cut_reasons": [
+				{
+					"frame": 150.0,
+					"reason": "scene_change"
+				}
+			],
+			"total_cuts": 1
+		},
+		"preferred_effects": {
+
+		},
+		"text_preferences": {
+
+		},
+		"timing_patterns": {
+			"typical_duration": 0
+		}
+	},
+	"video": "test_vlog.mp4"
+}

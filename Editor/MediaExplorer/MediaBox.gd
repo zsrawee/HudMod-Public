@@ -377,8 +377,3 @@ class MediaCard extends PanelContainer:
 			IS.set_base_panel_settings(self, STYLE_SELECTED)
 			modulate.a = .7
 			visible = false
-
-
-
-
-

@@ -23,3 +23,25 @@ mono_crash.*.json
 **/*.o
 **/*.obj
 **/*.pdb
+
+# Media / Binary files (too large for git)
+*.mp4
+*.mp3
+*.wav
+*.avi
+*.mov
+*.mkv
+*.flv
+*.webm
+*.ttf
+*.exe
+*.dll
+
+# Generated video output
+HudMod Video/generated_videos/
+test_project/HudMod/generated_videos/
+tiktok_project/
+
+# Waveform thumbnails (auto-generated)
+HudMod Video/image/waveform/
+test_project/HudMod/image/waveform/

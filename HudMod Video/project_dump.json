@@ -1,0 +1,154 @@
+{
+	"comments": [
+		{
+			"color": "#7ae65cff",
+			"frame": 867,
+			"name": "بببببببببببب",
+			"text": "هل تقدر تقرء وهو في اي ثايننو",
+			"timecode": "00:00:28:27"
+		},
+		{
+			"color": "#7ae65cff",
+			"frame": 975,
+			"name": "بيشيشيشيشيشيش",
+			"text": "",
+			"timecode": "00:00:32:15"
+		}
+	],
+	"fps": 30,
+	"layers": [
+		{
+			"clips": [
+				{
+					"components": [
+						{
+							"animations": [
+								{
+									"keyframes": [
+										{
+											"frame": 0,
+											"profile_index": 0,
+											"value": 0.7
+										},
+										{
+											"frame": 30,
+											"profile_index": 0,
+											"value": 0.7
+										}
+									],
+									"property": "opacity"
+								}
+							],
+							"enabled": true,
+							"method_type": 1,
+							"section": "Display2D",
+							"type": "CompCanvasItem"
+						},
+						{
+							"enabled": true,
+							"method_type": 1,
+							"section": "Display2D",
+							"type": "CompBlurGaussian"
+						},
+						{
+							"enabled": true,
+							"method_type": 1,
+							"section": "Display2D",
+							"type": "CompShake"
+						},
+						{
+							"enabled": true,
+							"method_type": 1,
+							"section": "Display2D",
+							"type": "CompFilmGrain"
+						}
+					],
+					"from": 0,
+					"id": "",
+					"length": 1500,
+					"start_frame": 62,
+					"type": "VideoClipRes"
+				},
+				{
+					"components": [
+						{
+							"enabled": true,
+							"method_type": 1,
+							"section": "Display2D",
+							"type": "CompCanvasItem"
+						},
+						{
+							"enabled": true,
+							"method_type": 1,
+							"section": "Display2D",
+							"type": "CompGlitch"
+						},
+						{
+							"enabled": true,
+							"method_type": 1,
+							"section": "Display2D",
+							"type": "CompGlow"
+						},
+						{
+							"enabled": true,
+							"method_type": 1,
+							"section": "Display2D",
+							"type": "CompVignette"
+						}
+					],
+					"from": 1500,
+					"id": "",
+					"length": 3000,
+					"start_frame": 1562,
+					"type": "VideoClipRes"
+				},
+				{
+					"components": [
+						{
+							"enabled": true,
+							"method_type": 1,
+							"section": "Display2D",
+							"type": "CompCanvasItem"
+						},
+						{
+							"enabled": true,
+							"method_type": 1,
+							"section": "Display2D",
+							"type": "CompHSL"
+						},
+						{
+							"enabled": true,
+							"method_type": 1,
+							"section": "Display2D",
+							"type": "CompVignette"
+						}
+					],
+					"from": 4500,
+					"id": "",
+					"length": 13252,
+					"start_frame": 4748,
+					"type": "VideoClipRes"
+				}
+			],
+			"layer_index": 0
+		},
+		{
+			"clips": [],
+			"layer_index": 1
+		}
+	],
+	"project_name": "HudMod Video",
+	"resolution": {
+		"x": 1920,
+		"y": 1080
+	},
+	"timemarkers": [
+		{
+			"color": "#6699ffff",
+			"description": "",
+			"frame": 0,
+			"name": "",
+			"timecode": "00:00:00:00"
+		}
+	]
+}

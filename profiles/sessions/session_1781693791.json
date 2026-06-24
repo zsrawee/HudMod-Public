@@ -1,0 +1,34 @@
+{
+	"decisions": [
+		{
+			"action": "cut",
+			"details": {
+				"frame": 150.0,
+				"reason": "scene_change"
+			},
+			"reason": "user_instruction",
+			"step": 1,
+			"timestamp": "2026-06-17 17:56:55"
+		},
+		{
+			"action": "add_effect",
+			"details": {
+				"component": "CompVignette",
+				"frame": 0.0,
+				"layer": 0.0
+			},
+			"reason": "user_instruction",
+			"step": 2,
+			"timestamp": "2026-06-17 17:58:02"
+		}
+	],
+	"ended_at": "2026-06-17 17:58:26",
+	"questions": [],
+	"session_id": "session_1781693791",
+	"started_at": "2026-06-17 17:56:31",
+	"status": "completed",
+	"style_extracted": {
+
+	},
+	"video": "my_vlog.mp4"
+}
